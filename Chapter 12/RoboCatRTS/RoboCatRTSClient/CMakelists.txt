@@ -1,0 +1,74 @@
+add_executable(RoboCatRTSClient WIN32)
+
+target_include_directories(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Inc ${CMAKE_CURRENT_SOURCE_DIR}/steam)
+target_include_directories(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(RoboCatRTSClient PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf ZLIB::ZLIB)
+
+if(WIN32)
+  target_link_libraries(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.lib)
+endif()
+
+target_sources(RoboCatRTSClient
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Command.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/CommandList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Engine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GameObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GameObjectRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GamerServicesSteam.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GraphicsDriver.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/HUD.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/InputManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/MemoryBitStream.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/NetworkManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RandGen.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboCat.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboMath.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/ScoreBoardManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/SpriteComponent.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/StringUtils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Texture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/TextureManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Timing.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/TurnData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/WindowManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/World.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Yarn.cpp
+)
+
+set(ASSETS_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/Debug/Assets")
+
+set(CARLITO_FONT "${ASSETS_FOLDER}/Carlito-Regular.ttf")
+
+set(CAT_TEXTURE "${ASSETS_FOLDER}/cat.png")
+set(MOUSE_TEXTURE "${ASSETS_FOLDER}/mouse.png")
+set(YARN_TEXTURE "${ASSETS_FOLDER}/yarn.png")
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Assets.in.h ${CMAKE_CURRENT_BINARY_DIR}/Assets.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Fonts.in.h ${CMAKE_CURRENT_BINARY_DIR}/Fonts.h @ONLY)
+
+if (WIN32)
+    add_custom_command(
+        TARGET RoboCatRTSClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+        COMMENT "Copying SDL redistributables\n"
+    )
+    add_custom_command(
+        TARGET RoboCatRTSClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE_DIR:ZLIB::ZLIB>/../bin/zlib.dll" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+        COMMENT "Copying ZLIB redistributables\n"
+    )
+    add_custom_command(
+        TARGET RoboCatRTSClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/steam_appid.txt" "${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.dll" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+        COMMENT "Copying Steam redistributables\n"
+    )
+    add_custom_command(
+        TARGET RoboCatRTSClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatRTSClient>/Assets"
+        COMMENT "Copying assets\n"
+    )
+endif()
