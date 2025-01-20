@@ -70,7 +70,7 @@ void ScoreBoardManager::IncScore(uint64_t inPlayerId, int inAmount) {
 }
 
 bool ScoreBoardManager::Write(OutputMemoryBitStream& inOutputStream) const {
-  int entryCount = mEntries.size();
+  int entryCount = static_cast<int>(mEntries.size());
 
   // we don't know our player names, so it's hard to check for remaining space
   // in the packet... not really a concern now though

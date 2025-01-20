@@ -3,11 +3,20 @@ add_executable(RoboCatRTSClient WIN32)
 target_include_directories(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Inc ${CMAKE_CURRENT_SOURCE_DIR}/steam)
 target_include_directories(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(RoboCatRTSClient PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf ZLIB::ZLIB)
+target_link_libraries(RoboCatRTSClient PRIVATE compiler_flags SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf ZLIB::ZLIB)
 
 if(WIN32)
-  target_link_libraries(RoboCatRTSClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.lib)
+  set(steam_linking_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.lib)
+  set(steam_redistributable_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.dll)
+elseif(LINUX)
+  set(steam_linking_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/linux64/libsteam_api.so)
+  set(steam_redistributable_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/linux64/libsteam_api.so)
+elseif(APPLE)
+  set(steam_linking_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/osx/libsteam_api.dylib)
+  set(steam_redistributable_path ${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/osx/libsteam_api.dylib)
 endif()
+
+target_link_libraries(RoboCatRTSClient PRIVATE ${steam_linking_path})
 
 target_sources(RoboCatRTSClient
   PRIVATE
@@ -50,25 +59,27 @@ set(YARN_TEXTURE "${ASSETS_FOLDER}/yarn.png")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Assets.in.h ${CMAKE_CURRENT_BINARY_DIR}/Assets.h @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Fonts.in.h ${CMAKE_CURRENT_BINARY_DIR}/Fonts.h @ONLY)
 
-if (WIN32)
-    add_custom_command(
-        TARGET RoboCatRTSClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
-        COMMENT "Copying SDL redistributables\n"
-    )
-    add_custom_command(
-        TARGET RoboCatRTSClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE_DIR:ZLIB::ZLIB>/../bin/zlib.dll" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
-        COMMENT "Copying ZLIB redistributables\n"
-    )
-    add_custom_command(
-        TARGET RoboCatRTSClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/steam_appid.txt" "${CMAKE_CURRENT_SOURCE_DIR}/steam/redistributable_bin/win64/steam_api64.dll" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
-        COMMENT "Copying Steam redistributables\n"
-    )
-    add_custom_command(
-        TARGET RoboCatRTSClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatRTSClient>/Assets"
-        COMMENT "Copying assets\n"
-    )
-endif()
+add_custom_command(
+    TARGET RoboCatRTSClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+    VERBATIM
+    COMMENT "Copying SDL redistributables"
+)
+add_custom_command(
+    TARGET RoboCatRTSClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE_DIR:ZLIB::ZLIB>/../bin/zlib.dll" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+    VERBATIM
+    COMMENT "Copying ZLIB redistributables"
+)
+add_custom_command(
+    TARGET RoboCatRTSClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/steam_appid.txt" "${steam_redistributable_path}" "$<TARGET_FILE_DIR:RoboCatRTSClient>"
+    VERBATIM
+    COMMENT "Copying Steam redistributables"
+)
+add_custom_command(
+    TARGET RoboCatRTSClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatRTSClient>/Assets"
+    VERBATIM
+    COMMENT "Copying assets"
+)

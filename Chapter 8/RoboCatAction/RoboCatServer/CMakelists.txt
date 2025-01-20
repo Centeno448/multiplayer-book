@@ -16,10 +16,10 @@ target_sources( RoboCatServer
   ${CMAKE_CURRENT_SOURCE_DIR}/Src/ServerMain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Src/YarnServer.cpp
 )
-if (WIN32)
-    add_custom_command(
-        TARGET RoboCatServer POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:RoboCatServer>"
-        VERBATIM
-    )
-endif()
+
+add_custom_command(
+    TARGET RoboCatServer POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:RoboCatServer>"
+    VERBATIM
+    COMMENT "Copying SDL redistributables"
+)

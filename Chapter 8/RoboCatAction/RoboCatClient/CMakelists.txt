@@ -35,15 +35,15 @@ set(YARN_TEXTURE "${ASSETS_FOLDER}/yarn.png")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Assets.in.h ${CMAKE_CURRENT_BINARY_DIR}/Assets.h @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Fonts.in.h ${CMAKE_CURRENT_BINARY_DIR}/Fonts.h @ONLY)
 
-if (WIN32)
-    add_custom_command(
-        TARGET RoboCatClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatClient>"
-        VERBATIM
-    )
-    add_custom_command(
-        TARGET RoboCatClient POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatClient>/Assets"
-        COMMENT "Copying assets"
-    )
-endif()
+add_custom_command(
+    TARGET RoboCatClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatClient>"
+    VERBATIM
+    COMMENT "Copying SDL redistributables"
+)
+add_custom_command(
+    TARGET RoboCatClient POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatClient>/Assets"
+    VERBATIM
+    COMMENT "Copying assets"
+)
