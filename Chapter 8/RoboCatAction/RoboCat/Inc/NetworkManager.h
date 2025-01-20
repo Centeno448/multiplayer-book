@@ -1,87 +1,96 @@
-typedef unordered_map< int, GameObjectPtr > IntToGameObjectMap;
+#pragma once
 
-class NetworkManager
-{
-public:
-	static const uint32_t	kHelloCC = 'HELO';
-	static const uint32_t	kWelcomeCC = 'WLCM';
-	static const uint32_t	kStateCC = 'STAT';
-	static const uint32_t	kInputCC = 'INPT';
-	static const int		kMaxPacketsPerFrameCount = 10;
+#include <list>
+#include <queue>
+#include <unordered_map>
 
-	NetworkManager();
-	virtual ~NetworkManager();
+#include "GameObject.h"
+#include "MemoryBitStream.h"
+#include "SocketAddress.h"
+#include "UDPSocket.h"
+#include "WeightedTimedMovingAverage.h"
 
-	bool	Init( uint16_t inPort );
-	void	ProcessIncomingPackets();
+typedef std::unordered_map<int, GameObjectPtr> IntToGameObjectMap;
 
-	virtual void	ProcessPacket( InputMemoryBitStream& inInputStream, const SocketAddress& inFromAddress ) = 0;
-	virtual void	HandleConnectionReset( const SocketAddress& inFromAddress ) { ( void ) inFromAddress; }
+class NetworkManager {
+ public:
+  static const uint32_t kHelloCC = 'HELO';
+  static const uint32_t kWelcomeCC = 'WLCM';
+  static const uint32_t kStateCC = 'STAT';
+  static const uint32_t kInputCC = 'INPT';
+  static const int kMaxPacketsPerFrameCount = 10;
 
-			void	SendPacket( const OutputMemoryBitStream& inOutputStream, const SocketAddress& inFromAddress );
+  NetworkManager();
+  virtual ~NetworkManager();
 
-			const WeightedTimedMovingAverage& GetBytesReceivedPerSecond()	const	{ return mBytesReceivedPerSecond; }
-			const WeightedTimedMovingAverage& GetBytesSentPerSecond()		const	{ return mBytesSentPerSecond; }
+  bool Init(uint16_t inPort);
+  void ProcessIncomingPackets();
 
-			void	SetDropPacketChance( float inChance )	{ mDropPacketChance = inChance; }
-			void	SetSimulatedLatency( float inLatency )	{ mSimulatedLatency = inLatency; }
+  virtual void ProcessPacket(InputMemoryBitStream& inInputStream,
+                             const SocketAddress& inFromAddress) = 0;
+  virtual void HandleConnectionReset(const SocketAddress& inFromAddress) {
+    (void)inFromAddress;
+  }
 
-			inline	GameObjectPtr	GetGameObject( int inNetworkId ) const;
-			void	AddToNetworkIdToGameObjectMap( GameObjectPtr inGameObject );
-			void	RemoveFromNetworkIdToGameObjectMap( GameObjectPtr inGameObject );
+  void SendPacket(const OutputMemoryBitStream& inOutputStream,
+                  const SocketAddress& inFromAddress);
 
-protected:
+  const WeightedTimedMovingAverage& GetBytesReceivedPerSecond() const {
+    return mBytesReceivedPerSecond;
+  }
+  const WeightedTimedMovingAverage& GetBytesSentPerSecond() const {
+    return mBytesSentPerSecond;
+  }
 
-	IntToGameObjectMap		mNetworkIdToGameObjectMap;
+  void SetDropPacketChance(float inChance) { mDropPacketChance = inChance; }
+  void SetSimulatedLatency(float inLatency) { mSimulatedLatency = inLatency; }
 
-private:
+  inline GameObjectPtr GetGameObject(int inNetworkId) const;
+  void AddToNetworkIdToGameObjectMap(GameObjectPtr inGameObject);
+  void RemoveFromNetworkIdToGameObjectMap(GameObjectPtr inGameObject);
 
-		class ReceivedPacket
-		{
-		public:
-			ReceivedPacket( float inReceivedTime, InputMemoryBitStream& inInputMemoryBitStream, const SocketAddress& inAddress );
+ protected:
+  IntToGameObjectMap mNetworkIdToGameObjectMap;
 
-			const	SocketAddress&			GetFromAddress()	const	{ return mFromAddress; }
-					float					GetReceivedTime()	const	{ return mReceivedTime; }
-					InputMemoryBitStream&	GetPacketBuffer()			{ return mPacketBuffer; }
+ private:
+  class ReceivedPacket {
+   public:
+    ReceivedPacket(float inReceivedTime,
+                   InputMemoryBitStream& inInputMemoryBitStream,
+                   const SocketAddress& inAddress);
 
-		private:
-			
-			float					mReceivedTime;
-			InputMemoryBitStream	mPacketBuffer;
-			SocketAddress			mFromAddress;
+    const SocketAddress& GetFromAddress() const { return mFromAddress; }
+    float GetReceivedTime() const { return mReceivedTime; }
+    InputMemoryBitStream& GetPacketBuffer() { return mPacketBuffer; }
 
-		};
+   private:
+    float mReceivedTime;
+    InputMemoryBitStream mPacketBuffer;
+    SocketAddress mFromAddress;
+  };
 
-			void	UpdateBytesSentLastFrame();
-			void	ReadIncomingPacketsIntoQueue();
-			void	ProcessQueuedPackets();
+  void UpdateBytesSentLastFrame();
+  void ReadIncomingPacketsIntoQueue();
+  void ProcessQueuedPackets();
 
-	queue< ReceivedPacket, list< ReceivedPacket > >	mPacketQueue;
+  std::queue<ReceivedPacket, std::list<ReceivedPacket> > mPacketQueue;
 
-	UDPSocketPtr	mSocket;
+  UDPSocketPtr mSocket;
 
-	WeightedTimedMovingAverage	mBytesReceivedPerSecond;
-	WeightedTimedMovingAverage	mBytesSentPerSecond;
+  WeightedTimedMovingAverage mBytesReceivedPerSecond;
+  WeightedTimedMovingAverage mBytesSentPerSecond;
 
-	int							mBytesSentThisFrame;
+  int mBytesSentThisFrame;
 
-	float						mDropPacketChance;
-	float						mSimulatedLatency;
-	
+  float mDropPacketChance;
+  float mSimulatedLatency;
 };
 
-	
-	
-inline	GameObjectPtr NetworkManager::GetGameObject( int inNetworkId ) const
-{ 
-	auto gameObjectIt = mNetworkIdToGameObjectMap.find( inNetworkId );
-	if( gameObjectIt != mNetworkIdToGameObjectMap.end() )
-	{
-		return gameObjectIt->second;
-	}
-	else
-	{
-		return GameObjectPtr();
-	}
+inline GameObjectPtr NetworkManager::GetGameObject(int inNetworkId) const {
+  auto gameObjectIt = mNetworkIdToGameObjectMap.find(inNetworkId);
+  if (gameObjectIt != mNetworkIdToGameObjectMap.end()) {
+    return gameObjectIt->second;
+  } else {
+    return GameObjectPtr();
+  }
 }

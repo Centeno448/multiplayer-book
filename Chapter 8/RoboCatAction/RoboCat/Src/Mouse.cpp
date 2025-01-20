@@ -1,82 +1,65 @@
-#include <RoboCatPCH.h>
+#include "Mouse.h"
 
-Mouse::Mouse()
-{
-	SetScale( GetScale() * 0.5f );
-	SetCollisionRadius( 0.25f );
+Mouse::Mouse() {
+  SetScale(GetScale() * 0.5f);
+  SetCollisionRadius(0.25f);
 }
 
-
-bool Mouse::HandleCollisionWithCat( RoboCat* inCat )
-{
-	( void ) inCat;
-	return false;
+bool Mouse::HandleCollisionWithCat(GameObject* inCat) {
+  (void)inCat;
+  return false;
 }
 
+uint32_t Mouse::Write(OutputMemoryBitStream& inOutputStream,
+                      uint32_t inDirtyState) const {
+  uint32_t writtenState = 0;
 
+  if (inDirtyState & EMRS_Pose) {
+    inOutputStream.Write((bool)true);
 
-uint32_t Mouse::Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const 
-{
-	uint32_t writtenState = 0;
+    Vector3 location = GetLocation();
+    inOutputStream.Write(location.mX);
+    inOutputStream.Write(location.mY);
 
-	if( inDirtyState & EMRS_Pose )
-	{
-		inOutputStream.Write( (bool)true );
+    inOutputStream.Write(GetRotation());
 
-		Vector3 location = GetLocation();
-		inOutputStream.Write( location.mX );
-		inOutputStream.Write( location.mY );
+    writtenState |= EMRS_Pose;
+  } else {
+    inOutputStream.Write((bool)false);
+  }
 
-		inOutputStream.Write( GetRotation() );
+  if (inDirtyState & EMRS_Color) {
+    inOutputStream.Write((bool)true);
 
-		writtenState |= EMRS_Pose;
-	}
-	else
-	{
-		inOutputStream.Write( (bool)false );
-	}
+    inOutputStream.Write(GetColor());
 
-	if( inDirtyState & EMRS_Color )
-	{
-		inOutputStream.Write( (bool)true );
+    writtenState |= EMRS_Color;
+  } else {
+    inOutputStream.Write((bool)false);
+  }
 
-		inOutputStream.Write( GetColor() );
-
-		writtenState |= EMRS_Color;
-	}
-	else
-	{
-		inOutputStream.Write( (bool)false );
-	}
-
-
-	return writtenState;
+  return writtenState;
 }
 
-void Mouse::Read( InputMemoryBitStream& inInputStream )
-{
-	bool stateBit;
+void Mouse::Read(InputMemoryBitStream& inInputStream) {
+  bool stateBit;
 
-	inInputStream.Read( stateBit );
-	if( stateBit )
-	{
-		Vector3 location;
-		inInputStream.Read( location.mX );
-		inInputStream.Read( location.mY );
-		SetLocation( location );
+  inInputStream.Read(stateBit);
+  if (stateBit) {
+    Vector3 location;
+    inInputStream.Read(location.mX);
+    inInputStream.Read(location.mY);
+    SetLocation(location);
 
-		float rotation;
-		inInputStream.Read( rotation );
-		SetRotation( rotation );
-	}
+    float rotation;
+    inInputStream.Read(rotation);
+    SetRotation(rotation);
+  }
 
-
-	inInputStream.Read( stateBit );
-	if( stateBit )
-	{	
-		Vector3 color;
-		inInputStream.Read( color );
-		SetColor( color );
-	}
+  inInputStream.Read(stateBit);
+  if (stateBit) {
+    Vector3 color;
+    inInputStream.Read(color);
+    SetColor(color);
+  }
 }
-

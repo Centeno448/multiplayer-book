@@ -1,45 +1,50 @@
-class Yarn : public GameObject
-{
-public:
+#pragma once
 
-	CLASS_IDENTIFICATION( 'YARN', GameObject )
+#include <memory>
 
-	enum EYarnReplicationState
-	{
-		EYRS_Pose			= 1 << 0,
-		EYRS_Color			= 1 << 1,
-		EYRS_PlayerId		= 1 << 2,
+#include "GameObject.h"
+#include "MemoryBitStream.h"
+#include "RoboCat.h"
+#include "RoboMath.h"
 
-		EYRS_AllState	= EYRS_Pose | EYRS_Color | EYRS_PlayerId
-	};
+class Yarn : public GameObject {
+ public:
+  CLASS_IDENTIFICATION('YARN', GameObject)
 
-	static	GameObject*	StaticCreate() { return new Yarn(); }
+  enum EYarnReplicationState {
+    EYRS_Pose = 1 << 0,
+    EYRS_Color = 1 << 1,
+    EYRS_PlayerId = 1 << 2,
 
-	virtual uint32_t	GetAllStateMask()	const override	{ return EYRS_AllState; }
+    EYRS_AllState = EYRS_Pose | EYRS_Color | EYRS_PlayerId
+  };
 
-	virtual uint32_t	Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const override;
+  static GameObject* StaticCreate() { return new Yarn(); }
 
-	void			SetVelocity( const Vector3& inVelocity )	{ mVelocity = inVelocity; }
-	const Vector3&	GetVelocity() const					{ return mVelocity; }
+  virtual uint32_t GetAllStateMask() const override { return EYRS_AllState; }
 
-	void		SetPlayerId( int inPlayerId )	{ mPlayerId = inPlayerId; }
-	int			GetPlayerId() const				{ return mPlayerId; }
+  virtual uint32_t Write(OutputMemoryBitStream& inOutputStream,
+                         uint32_t inDirtyState) const override;
 
-	void		InitFromShooter( RoboCat* inShooter );
+  void SetVelocity(const Vector3& inVelocity) { mVelocity = inVelocity; }
+  const Vector3& GetVelocity() const { return mVelocity; }
 
-	virtual void Update() override;
+  void SetPlayerId(int inPlayerId) { mPlayerId = inPlayerId; }
+  int GetPlayerId() const { return mPlayerId; }
 
-	virtual bool HandleCollisionWithCat( RoboCat* inCat ) override;
+  void InitFromShooter(RoboCat* inShooter);
 
-protected:
-	Yarn();
+  virtual void Update() override;
 
+  virtual bool HandleCollisionWithCat(GameObject* inCat) override;
 
-	Vector3		mVelocity;
+ protected:
+  Yarn();
 
-	float		mMuzzleSpeed;
-	int			mPlayerId;
+  Vector3 mVelocity;
 
+  float mMuzzleSpeed;
+  int mPlayerId;
 };
 
-typedef shared_ptr< Yarn >	YarnPtr;
+typedef std::shared_ptr<Yarn> YarnPtr;

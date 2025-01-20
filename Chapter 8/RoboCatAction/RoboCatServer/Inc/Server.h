@@ -1,24 +1,25 @@
-class Server : public Engine
-{
-public:
+#pragma once
 
-	static bool StaticInit();
+#include "ClientProxy.h"
+#include "RoboCatShared.h"
 
-	virtual void DoFrame() override;
+class Server : public Engine {
+ public:
+  static bool StaticInit();
 
-	virtual int Run();
+  virtual void DoFrame() override;
 
-	void HandleNewClient( ClientProxyPtr inClientProxy );
-	void HandleLostClient( ClientProxyPtr inClientProxy );
+  virtual int Run();
 
-	RoboCatPtr	GetCatForPlayer( int inPlayerId );
-	void	SpawnCatForPlayer( int inPlayerId );
+  void HandleNewClient(ClientProxyPtr inClientProxy);
+  void HandleLostClient(ClientProxyPtr inClientProxy);
 
+  RoboCatPtr GetCatForPlayer(int inPlayerId);
+  void SpawnCatForPlayer(int inPlayerId);
 
-private:
-	Server();
+ private:
+  Server();
 
-	bool	InitNetworkManager();
-	void	SetupWorld();
-
+  bool InitNetworkManager();
+  void SetupWorld();
 };

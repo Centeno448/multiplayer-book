@@ -1,26 +1,29 @@
-class SpriteComponent
-{
-public:
+#pragma once
 
-	SpriteComponent( GameObject* inGameObject );
-	~SpriteComponent();
+#include <memory>
 
-	virtual void		Draw( const SDL_Rect& inViewTransform );
+#include "RoboCatShared.h"
+#include "Texture.h"
 
-			void		SetTexture( TexturePtr inTexture )			{ mTexture = inTexture; }
+class SpriteComponent {
+ public:
+  SpriteComponent(GameObject* inGameObject);
+  ~SpriteComponent();
 
-			Vector3		GetOrigin()					const			{ return mOrigin; }
-			void		SetOrigin( const Vector3& inOrigin )		{ mOrigin = inOrigin; }
+  virtual void Draw(const SDL_Rect& inViewTransform);
 
+  void SetTexture(TexturePtr inTexture) { mTexture = inTexture; }
 
-private:
+  Vector3 GetOrigin() const { return mOrigin; }
+  void SetOrigin(const Vector3& inOrigin) { mOrigin = inOrigin; }
 
-	Vector3											mOrigin;
+ private:
+  Vector3 mOrigin;
 
-	TexturePtr										mTexture;
+  TexturePtr mTexture;
 
-	//don't want circular reference...
-	GameObject*										mGameObject;
+  // don't want circular reference...
+  GameObject* mGameObject;
 };
 
-typedef shared_ptr< SpriteComponent >	SpriteComponentPtr;
+typedef std::shared_ptr<SpriteComponent> SpriteComponentPtr;

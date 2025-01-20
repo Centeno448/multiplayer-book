@@ -1,0 +1,5 @@
+#pragma once
+
+#define CAT_TEXTURE "@CAT_TEXTURE@"
+#define MOUSE_TEXTURE "@MOUSE_TEXTURE@"
+#define YARN_TEXTURE "@YARN_TEXTURE@"

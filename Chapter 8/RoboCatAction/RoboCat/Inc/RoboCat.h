@@ -1,77 +1,74 @@
-class RoboCat : public GameObject
-{
-public:
-	CLASS_IDENTIFICATION( 'RCAT', GameObject )
+#pragma once
 
-	enum ECatReplicationState
-	{
-		ECRS_Pose = 1 << 0,
-		ECRS_Color = 1 << 1,
-		ECRS_PlayerId = 1 << 2,
-		ECRS_Health = 1 << 3,
+#include <memory>
 
-		ECRS_AllState = ECRS_Pose | ECRS_Color | ECRS_PlayerId | ECRS_Health
-	};
+#include "GameObject.h"
+#include "InputState.h"
+#include "MemoryBitStream.h"
+#include "RoboMath.h"
 
+class RoboCat : public GameObject {
+ public:
+  CLASS_IDENTIFICATION('RCAT', GameObject)
 
-	static	GameObject*	StaticCreate()			{ return new RoboCat(); }
+  enum ECatReplicationState {
+    ECRS_Pose = 1 << 0,
+    ECRS_Color = 1 << 1,
+    ECRS_PlayerId = 1 << 2,
+    ECRS_Health = 1 << 3,
 
-	virtual uint32_t GetAllStateMask()	const override	{ return ECRS_AllState; }
+    ECRS_AllState = ECRS_Pose | ECRS_Color | ECRS_PlayerId | ECRS_Health
+  };
 
-	virtual	RoboCat*	GetAsCat()	{ return this; }
+  static GameObject* StaticCreate() { return new RoboCat(); }
 
-	virtual void Update()	override;
+  virtual uint32_t GetAllStateMask() const override { return ECRS_AllState; }
 
-	void ProcessInput( float inDeltaTime, const InputState& inInputState );
-	void SimulateMovement( float inDeltaTime );
+  virtual RoboCat* GetAsCat() { return this; }
 
-	void ProcessCollisions();
-	void ProcessCollisionsWithScreenWalls();
+  virtual void Update() override;
 
-	void		SetPlayerId( uint32_t inPlayerId )			{ mPlayerId = inPlayerId; }
-	uint32_t	GetPlayerId()						const 	{ return mPlayerId; }
+  void ProcessInput(float inDeltaTime, const InputState& inInputState);
+  void SimulateMovement(float inDeltaTime);
 
-	void			SetVelocity( const Vector3& inVelocity )	{ mVelocity = inVelocity; }
-	const Vector3&	GetVelocity()						const	{ return mVelocity; }
+  void ProcessCollisions();
+  void ProcessCollisionsWithScreenWalls();
 
-	virtual uint32_t	Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const override;
+  void SetPlayerId(uint32_t inPlayerId) { mPlayerId = inPlayerId; }
+  uint32_t GetPlayerId() const { return mPlayerId; }
 
-protected:
-	RoboCat();
+  void SetVelocity(const Vector3& inVelocity) { mVelocity = inVelocity; }
+  const Vector3& GetVelocity() const { return mVelocity; }
 
-private:
+  virtual uint32_t Write(OutputMemoryBitStream& inOutputStream,
+                         uint32_t inDirtyState) const override;
 
+ protected:
+  RoboCat();
 
-	void	AdjustVelocityByThrust( float inDeltaTime );
+ private:
+  void AdjustVelocityByThrust(float inDeltaTime);
 
-	Vector3				mVelocity;
+  Vector3 mVelocity;
 
+  float mMaxLinearSpeed;
+  float mMaxRotationSpeed;
 
-	float				mMaxLinearSpeed;
-	float				mMaxRotationSpeed;
+  // bounce fraction when hitting various things
+  float mWallRestitution;
+  float mCatRestitution;
 
-	//bounce fraction when hitting various things
-	float				mWallRestitution;
-	float				mCatRestitution;
+  uint32_t mPlayerId;
 
+ protected:
+  /// move down here for padding reasons...
 
-	uint32_t			mPlayerId;
+  float mLastMoveTimestamp;
 
-protected:
+  float mThrustDir;
+  int mHealth;
 
-	///move down here for padding reasons...
-	
-	float				mLastMoveTimestamp;
-
-	float				mThrustDir;
-	int					mHealth;
-
-	bool				mIsShooting;
-
-	
-
-
-
+  bool mIsShooting;
 };
 
-typedef shared_ptr< RoboCat >	RoboCatPtr;
+typedef std::shared_ptr<RoboCat> RoboCatPtr;

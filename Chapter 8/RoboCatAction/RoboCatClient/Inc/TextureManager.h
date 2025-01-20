@@ -1,16 +1,22 @@
-class TextureManager
-{
-public:
-	static void StaticInit();
+#pragma once
 
-	static std::unique_ptr< TextureManager >		sInstance;
+#include <string>
+#include <unordered_map>
 
-	TexturePtr	GetTexture( const string& inTextureName );
+#include "Texture.h"
 
-private:
-	TextureManager();
+class TextureManager {
+ public:
+  static void StaticInit();
 
-	bool CacheTexture( string inName, const char* inFileName );
+  static std::unique_ptr<TextureManager> sInstance;
 
-	unordered_map< string, TexturePtr >	mNameToTextureMap;
+  TexturePtr GetTexture(const std::string& inTextureName);
+
+ private:
+  TextureManager();
+
+  bool CacheTexture(std::string inName, const char* inFileName);
+
+  std::unordered_map<std::string, TexturePtr> mNameToTextureMap;
 };

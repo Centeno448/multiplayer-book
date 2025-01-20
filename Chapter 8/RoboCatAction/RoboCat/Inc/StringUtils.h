@@ -1,11 +1,14 @@
-namespace StringUtils
-{
-	string GetCommandLineArg( int inIndex );
+#pragma once
 
-	string Sprintf( const char* inFormat, ... );
+#include <string>
 
-	void	Log( const char* inFormat );
-	void	Log( const char* inFormat, ... );
-}
+namespace StringUtils {
+std::string GetCommandLineArg(int inIndex);
 
-#define LOG( ... ) StringUtils::Log( __VA_ARGS__ );
+std::string Sprintf(const char* inFormat, ...);
+
+void Log(const char* inFormat);
+void Log(const char* inFormat, ...);
+}  // namespace StringUtils
+
+#define LOG(...) StringUtils::Log(__VA_ARGS__);

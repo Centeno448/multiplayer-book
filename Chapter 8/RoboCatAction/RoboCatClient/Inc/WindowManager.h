@@ -1,16 +1,20 @@
-class WindowManager
-{
+#pragma once
 
-public:
-	
-	static bool StaticInit();
-	static std::unique_ptr< WindowManager >	sInstance;
+#include <SDL.h>
 
-	SDL_Window*		GetMainWindow()	const	{ return mMainWindow; }
+#include <memory>
 
-	~WindowManager();
-private:
-	WindowManager( SDL_Window* inMainWindow );
+class WindowManager {
+ public:
+  static bool StaticInit();
+  static std::unique_ptr<WindowManager> sInstance;
 
-	SDL_Window*				mMainWindow;
+  SDL_Window* GetMainWindow() const { return mMainWindow; }
+
+  ~WindowManager();
+
+ private:
+  WindowManager(SDL_Window* inMainWindow);
+
+  SDL_Window* mMainWindow;
 };

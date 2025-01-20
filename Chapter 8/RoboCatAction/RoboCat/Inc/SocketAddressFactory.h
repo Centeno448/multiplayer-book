@@ -1,8 +1,10 @@
+#pragma once
 
+#include <string>
 
-class SocketAddressFactory
-{
-public:
+#include "SocketAddress.h"
 
-	static SocketAddressPtr CreateIPv4FromString( const string& inString );
+class SocketAddressFactory {
+ public:
+  static SocketAddressPtr CreateIPv4FromString(const std::string& inString);
 };

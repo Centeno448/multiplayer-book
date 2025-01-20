@@ -1,18 +1,18 @@
-class Client : public Engine
-{
-public:
+#pragma once
 
-	static bool StaticInit( );
+#include <SDL_events.h>
 
-protected:
+#include "RoboCatShared.h"
 
-	Client();
+class Client : public Engine {
+ public:
+  static bool StaticInit();
 
-	virtual void	DoFrame() override;
-	virtual void	HandleEvent( SDL_Event* inEvent ) override;
+ protected:
+  Client();
 
-private:
+  virtual void DoFrame() override;
+  virtual void HandleEvent(SDL_Event* inEvent) override;
 
-
-
+ private:
 };

@@ -1,106 +1,78 @@
-#include <RoboCatPCH.h>
+#include "Yarn.h"
 
-Yarn::Yarn() :
-	mMuzzleSpeed( 3.f ),
-	mVelocity( Vector3::Zero ),
-	mPlayerId( 0 )
-{
-	SetScale( GetScale() * 0.25f );
-	SetCollisionRadius( 0.125f );
+#include "Timing.h"
+
+Yarn::Yarn() : mMuzzleSpeed(3.f), mVelocity(Vector3::Zero), mPlayerId(0) {
+  SetScale(GetScale() * 0.25f);
+  SetCollisionRadius(0.125f);
 }
 
+uint32_t Yarn::Write(OutputMemoryBitStream& inOutputStream,
+                     uint32_t inDirtyState) const {
+  uint32_t writtenState = 0;
 
+  if (inDirtyState & EYRS_Pose) {
+    inOutputStream.Write((bool)true);
 
-uint32_t Yarn::Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const 
-{
-	uint32_t writtenState = 0;
+    Vector3 location = GetLocation();
+    inOutputStream.Write(location.mX);
+    inOutputStream.Write(location.mY);
 
-	if( inDirtyState & EYRS_Pose )
-	{
-		inOutputStream.Write( (bool)true );
+    Vector3 velocity = GetVelocity();
+    inOutputStream.Write(velocity.mX);
+    inOutputStream.Write(velocity.mY);
 
-		Vector3 location = GetLocation();
-		inOutputStream.Write( location.mX );
-		inOutputStream.Write( location.mY );
+    inOutputStream.Write(GetRotation());
 
-		Vector3 velocity = GetVelocity();
-		inOutputStream.Write( velocity.mX );
-		inOutputStream.Write( velocity.mY );
+    writtenState |= EYRS_Pose;
+  } else {
+    inOutputStream.Write((bool)false);
+  }
 
-		inOutputStream.Write( GetRotation() );
+  if (inDirtyState & EYRS_Color) {
+    inOutputStream.Write((bool)true);
 
-		writtenState |= EYRS_Pose;
-	}
-	else
-	{
-		inOutputStream.Write( (bool)false );
-	}
+    inOutputStream.Write(GetColor());
 
-	if( inDirtyState & EYRS_Color )
-	{
-		inOutputStream.Write( (bool)true );
+    writtenState |= EYRS_Color;
+  } else {
+    inOutputStream.Write((bool)false);
+  }
 
-		inOutputStream.Write( GetColor() );
+  if (inDirtyState & EYRS_PlayerId) {
+    inOutputStream.Write((bool)true);
 
-		writtenState |= EYRS_Color;
-	}
-	else
-	{
-		inOutputStream.Write( (bool)false );
-	}
+    inOutputStream.Write(mPlayerId, 8);
 
-	if( inDirtyState & EYRS_PlayerId )
-	{
-		inOutputStream.Write( (bool)true );
+    writtenState |= EYRS_PlayerId;
+  } else {
+    inOutputStream.Write((bool)false);
+  }
 
-		inOutputStream.Write( mPlayerId, 8 );
-
-		writtenState |= EYRS_PlayerId;
-	}
-	else
-	{
-		inOutputStream.Write( (bool)false );
-	}
-
-
-
-
-	return writtenState;
+  return writtenState;
 }
 
-
-
-bool Yarn::HandleCollisionWithCat( RoboCat* inCat )
-{
-	( void ) inCat;
-
-	//you hit a cat, so look like you hit a cat
-	
-
-
-	return false;
+bool Yarn::HandleCollisionWithCat(GameObject* inCat) {
+  // you hit a cat, so look like you hit a cat
+  (void)inCat;
+  return false;
 }
 
+void Yarn::InitFromShooter(RoboCat* inShooter) {
+  SetColor(inShooter->GetColor());
+  SetPlayerId(inShooter->GetPlayerId());
 
-void Yarn::InitFromShooter( RoboCat* inShooter )
-{
-	SetColor( inShooter->GetColor() );
-	SetPlayerId( inShooter->GetPlayerId() );
+  Vector3 forward = inShooter->GetForwardVector();
+  SetVelocity(inShooter->GetVelocity() + forward * mMuzzleSpeed);
+  SetLocation(inShooter->GetLocation() /* + forward * 0.55f */);
 
-	Vector3 forward = inShooter->GetForwardVector();
-	SetVelocity( inShooter->GetVelocity() + forward * mMuzzleSpeed );
-	SetLocation( inShooter->GetLocation() /* + forward * 0.55f */ );
-
-	SetRotation( inShooter->GetRotation() );
+  SetRotation(inShooter->GetRotation());
 }
 
-void Yarn::Update()
-{
-	
-	float deltaTime = Timing::sInstance.GetDeltaTime();
+void Yarn::Update() {
+  float deltaTime = Timing::sInstance.GetDeltaTime();
 
-	SetLocation( GetLocation() + mVelocity * deltaTime );
-	
+  SetLocation(GetLocation() + mVelocity * deltaTime);
 
-	//we'll let the cats handle the collisions
+  // we'll let the cats handle the collisions
 }

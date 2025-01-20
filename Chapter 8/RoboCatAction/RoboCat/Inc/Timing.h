@@ -1,31 +1,28 @@
-class Timing
-{
-public:
+#pragma once
 
-	Timing();
-	
-	void Update();
+#include <cstdint>
 
-	float GetDeltaTime() const { return mDeltaTime; }
+class Timing {
+ public:
+  Timing();
 
-	double GetTime() const;
+  void Update();
 
-	float GetTimef() const
-	{
-		return static_cast< float >( GetTime() );
-	}
+  float GetDeltaTime() const { return mDeltaTime; }
 
-	float GetFrameStartTime() const { return mFrameStartTimef; }
+  double GetTime() const;
 
+  float GetTimef() const { return static_cast<float>(GetTime()); }
 
-	static Timing sInstance; 
+  float GetFrameStartTime() const { return mFrameStartTimef; }
 
-private:
-	float		mDeltaTime;
-	uint64_t	mDeltaTick;
+  static Timing sInstance;
 
-	double		mLastFrameStartTime;
-	float		mFrameStartTimef;
-	double		mPerfCountDuration;
+ private:
+  float mDeltaTime;
+  uint64_t mDeltaTick;
 
+  double mLastFrameStartTime;
+  float mFrameStartTimef;
+  double mPerfCountDuration;
 };

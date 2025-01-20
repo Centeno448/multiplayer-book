@@ -1,0 +1,38 @@
+add_library(RoboCatLib STATIC)
+
+target_include_directories(RoboCatLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Inc")
+
+target_link_libraries(RoboCatLib PUBLIC SDL2::SDL2 compiler_flags)
+
+if(WIN32)
+  target_link_libraries(RoboCatLib PUBLIC wsock32 ws2_32)
+endif()
+
+target_sources(RoboCatLib
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/AckRange.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/DeliveryNotificationManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Engine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GameObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GameObjectRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/InFlightPacket.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/InputState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/MemoryBitStream.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Mouse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Move.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/MoveList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/NetworkManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboCat.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboCatShared.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboMath.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/ScoreBoardManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/SocketAddress.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/SocketAddressFactory.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/SocketUtil.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/StringUtils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/TCPSocket.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Timing.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/UDPSocket.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/World.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Yarn.cpp
+)

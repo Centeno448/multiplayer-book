@@ -1,24 +1,26 @@
+#pragma once
 
-class GraphicsDriver
-{
-public:
+#include <SDL.h>
 
-	static bool StaticInit( SDL_Window* inWnd );
+#include <memory>
 
-	static std::unique_ptr< GraphicsDriver >		sInstance;
+class GraphicsDriver {
+ public:
+  static bool StaticInit(SDL_Window* inWnd);
 
-	void					Clear();
-	void					Present();
-	SDL_Rect&				GetLogicalViewport();
-	SDL_Renderer*			GetRenderer();
+  static std::unique_ptr<GraphicsDriver> sInstance;
 
-	~GraphicsDriver();
+  void Clear();
+  void Present();
+  SDL_Rect& GetLogicalViewport();
+  SDL_Renderer* GetRenderer();
 
-private:
+  ~GraphicsDriver();
 
-	GraphicsDriver();
-	bool Init( SDL_Window* inWnd );
+ private:
+  GraphicsDriver();
+  bool Init(SDL_Window* inWnd);
 
-	SDL_Renderer*			mRenderer;
-	SDL_Rect				mViewport;
+  SDL_Renderer* mRenderer;
+  SDL_Rect mViewport;
 };

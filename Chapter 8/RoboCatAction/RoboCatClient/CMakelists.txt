@@ -1,0 +1,49 @@
+add_executable(RoboCatClient WIN32)
+
+target_include_directories(RoboCatClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Inc)
+target_include_directories(RoboCatClient PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(RoboCatClient PRIVATE RoboCatLib SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf)
+
+target_sources(RoboCatClient
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Client.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/ClientMain.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/GraphicsDriver.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/HUD.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/InputManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/MouseClient.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/NetworkManagerClient.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RenderManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/ReplicationManagerClient.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/RoboCatClient.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/SpriteComponent.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/Texture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/TextureManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/WindowManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Src/YarnClient.cpp
+)
+
+set(ASSETS_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/Debug/Assets")
+
+set(CARLITO_FONT "${ASSETS_FOLDER}/Carlito-Regular.ttf")
+
+set(CAT_TEXTURE "${ASSETS_FOLDER}/cat.png")
+set(MOUSE_TEXTURE "${ASSETS_FOLDER}/mouse.png")
+set(YARN_TEXTURE "${ASSETS_FOLDER}/yarn.png")
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Assets.in.h ${CMAKE_CURRENT_BINARY_DIR}/Assets.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Inc/Fonts.in.h ${CMAKE_CURRENT_BINARY_DIR}/Fonts.h @ONLY)
+
+if (WIN32)
+    add_custom_command(
+        TARGET RoboCatClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE:SDL2_image::SDL2_image>" "$<TARGET_FILE:SDL2_ttf::SDL2_ttf>" "$<TARGET_FILE_DIR:RoboCatClient>"
+        VERBATIM
+    )
+    add_custom_command(
+        TARGET RoboCatClient POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different  "${CMAKE_CURRENT_SOURCE_DIR}/Assets/" "$<TARGET_FILE_DIR:RoboCatClient>/Assets"
+        COMMENT "Copying assets"
+    )
+endif()

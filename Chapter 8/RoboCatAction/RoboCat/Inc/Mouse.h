@@ -1,26 +1,30 @@
-class Mouse : public GameObject
-{
-public:
-	CLASS_IDENTIFICATION( 'MOUS', GameObject )
+#pragma once
 
-	enum EMouseReplicationState
-	{
-		EMRS_Pose		= 1 << 0,
-		EMRS_Color		= 1 << 1,
+#include "GameObject.h"
+#include "MemoryBitStream.h"
+#include "RoboCat.h"
 
-		EMRS_AllState	= EMRS_Pose | EMRS_Color
-	};
+class Mouse : public GameObject {
+ public:
+  CLASS_IDENTIFICATION('MOUS', GameObject)
 
-	static	GameObject*	StaticCreate() { return new Mouse(); }
+  enum EMouseReplicationState {
+    EMRS_Pose = 1 << 0,
+    EMRS_Color = 1 << 1,
 
-	virtual uint32_t	GetAllStateMask()	const override	{ return EMRS_AllState; }
+    EMRS_AllState = EMRS_Pose | EMRS_Color
+  };
 
-	virtual uint32_t	Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const override;
-	virtual void		Read( InputMemoryBitStream& inInputStream ) override;
+  static GameObject* StaticCreate() { return new Mouse(); }
 
-	virtual bool HandleCollisionWithCat( RoboCat* inCat ) override;
+  virtual uint32_t GetAllStateMask() const override { return EMRS_AllState; }
 
-protected:
-	Mouse();
+  virtual uint32_t Write(OutputMemoryBitStream& inOutputStream,
+                         uint32_t inDirtyState) const override;
+  virtual void Read(InputMemoryBitStream& inInputStream) override;
 
+  virtual bool HandleCollisionWithCat(GameObject* inCat) override;
+
+ protected:
+  Mouse();
 };

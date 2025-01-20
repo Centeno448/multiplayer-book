@@ -1,32 +1,37 @@
+#pragma once
 
-class InputManager
-{
-public:
+#include <memory>
 
+#include "RoboCatShared.h"
 
-	static void StaticInit();
-	static unique_ptr< InputManager >	sInstance;
+class InputManager {
+ public:
+  static void StaticInit();
+  static std::unique_ptr<InputManager> sInstance;
 
-	void HandleInput( EInputAction inInputAction, int inKeyCode );
+  void HandleInput(EInputAction inInputAction, int inKeyCode);
 
-	const InputState& GetState()	const	{ return mCurrentState; }
+  const InputState& GetState() const { return mCurrentState; }
 
-	MoveList&			GetMoveList()		{ return mMoveList; }
+  MoveList& GetMoveList() { return mMoveList; }
 
-	const Move*			GetAndClearPendingMove()	{ auto toRet = mPendingMove; mPendingMove = nullptr; return toRet; }
+  const Move* GetAndClearPendingMove() {
+    auto toRet = mPendingMove;
+    mPendingMove = nullptr;
+    return toRet;
+  }
 
-	void				Update();
+  void Update();
 
-private:
+ private:
+  InputState mCurrentState;
 
-	InputState							mCurrentState;
+  InputManager();
 
-	InputManager();
+  bool IsTimeToSampleInput();
+  const Move& SampleInputAsMove();
 
-	bool				IsTimeToSampleInput();
-	const Move&			SampleInputAsMove();
-	
-	MoveList		mMoveList;
-	float			mNextTimeToSampleInput;
-	const Move*		mPendingMove;
+  MoveList mMoveList;
+  float mNextTimeToSampleInput;
+  const Move* mPendingMove;
 };

@@ -1,17 +1,22 @@
-class YarnServer : public Yarn
-{
-public:
-	static GameObjectPtr	StaticCreate() { return NetworkManagerServer::sInstance->RegisterAndReturn( new YarnServer() ); }
-	void HandleDying() override;
+#pragma once
 
-	virtual bool		HandleCollisionWithCat( RoboCat* inCat ) override;
+#include "NetworkManagerServer.h"
+#include "RoboCatShared.h"
 
-	virtual void Update() override;
+class YarnServer : public Yarn {
+ public:
+  static GameObjectPtr StaticCreate() {
+    return NetworkManagerServer::sInstance->RegisterAndReturn(new YarnServer());
+  }
+  void HandleDying() override;
 
-protected:
-	YarnServer();
+  virtual bool HandleCollisionWithCat(GameObject* inCat) override;
 
-private:
-	float mTimeToDie;
+  virtual void Update() override;
 
+ protected:
+  YarnServer();
+
+ private:
+  float mTimeToDie;
 };

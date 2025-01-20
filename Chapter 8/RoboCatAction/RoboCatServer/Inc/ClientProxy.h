@@ -1,51 +1,66 @@
-class ClientProxy
-{
-public:
+#pragma once
 
-	ClientProxy( const SocketAddress& inSocketAddress, const string& inName, int inPlayerId );
+#include <memory>
+#include <string>
 
-	const	SocketAddress&	GetSocketAddress()	const	{ return mSocketAddress; }
-			int				GetPlayerId()		const	{ return mPlayerId; }
-	const	string&		GetName()			const	{ return mName; }
+#include "ReplicationManagerServer.h"
+#include "RoboCatShared.h"
 
-			void			SetInputState( const InputState& inInputState )		{ mInputState = inInputState; }
-	const	InputState&		GetInputState()		const	{ return mInputState; }
+class ClientProxy {
+ public:
+  ClientProxy(const SocketAddress& inSocketAddress, const std::string& inName,
+              int inPlayerId);
 
-			void			UpdateLastPacketTime();
-			float			GetLastPacketFromClientTime()	const	{ return mLastPacketFromClientTime; }
+  const SocketAddress& GetSocketAddress() const { return mSocketAddress; }
+  int GetPlayerId() const { return mPlayerId; }
+  const std::string& GetName() const { return mName; }
 
-			DeliveryNotificationManager&	GetDeliveryNotificationManager()	{ return mDeliveryNotificationManager; }
-			ReplicationManagerServer&		GetReplicationManagerServer()		{ return mReplicationManagerServer; }
+  void SetInputState(const InputState& inInputState) {
+    mInputState = inInputState;
+  }
+  const InputState& GetInputState() const { return mInputState; }
 
-			const	MoveList&				GetUnprocessedMoveList() const		{ return mUnprocessedMoveList; }
-					MoveList&				GetUnprocessedMoveList()			{ return mUnprocessedMoveList; }
+  void UpdateLastPacketTime();
+  float GetLastPacketFromClientTime() const {
+    return mLastPacketFromClientTime;
+  }
 
-			void	SetIsLastMoveTimestampDirty( bool inIsDirty )				{ mIsLastMoveTimestampDirty = inIsDirty; }
-			bool	IsLastMoveTimestampDirty()						const		{ return mIsLastMoveTimestampDirty; }
+  DeliveryNotificationManager& GetDeliveryNotificationManager() {
+    return mDeliveryNotificationManager;
+  }
+  ReplicationManagerServer& GetReplicationManagerServer() {
+    return mReplicationManagerServer;
+  }
 
-			void	HandleCatDied();
-			void	RespawnCatIfNecessary();
+  const MoveList& GetUnprocessedMoveList() const {
+    return mUnprocessedMoveList;
+  }
+  MoveList& GetUnprocessedMoveList() { return mUnprocessedMoveList; }
 
-private:
+  void SetIsLastMoveTimestampDirty(bool inIsDirty) {
+    mIsLastMoveTimestampDirty = inIsDirty;
+  }
+  bool IsLastMoveTimestampDirty() const { return mIsLastMoveTimestampDirty; }
 
-	DeliveryNotificationManager	mDeliveryNotificationManager;
-	ReplicationManagerServer	mReplicationManagerServer;
+  void HandleCatDied();
+  void RespawnCatIfNecessary();
 
-	SocketAddress	mSocketAddress;
-	string			mName;
-	int				mPlayerId;
+ private:
+  DeliveryNotificationManager mDeliveryNotificationManager;
+  ReplicationManagerServer mReplicationManagerServer;
 
-	//going away!
-	InputState		mInputState;
+  SocketAddress mSocketAddress;
+  std::string mName;
+  int mPlayerId;
 
-	float			mLastPacketFromClientTime;
-	float			mTimeToRespawn;
+  // going away!
+  InputState mInputState;
 
-	MoveList		mUnprocessedMoveList;
-	bool			mIsLastMoveTimestampDirty;
+  float mLastPacketFromClientTime;
+  float mTimeToRespawn;
 
-
-
+  MoveList mUnprocessedMoveList;
+  bool mIsLastMoveTimestampDirty;
 };
 
-typedef shared_ptr< ClientProxy >	ClientProxyPtr;
+typedef std::shared_ptr<ClientProxy> ClientProxyPtr;

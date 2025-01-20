@@ -1,77 +1,83 @@
 
-#define CLASS_IDENTIFICATION( inCode, inClass ) \
-enum { kClassId = inCode }; \
-virtual uint32_t GetClassId() const { return kClassId; } \
-static GameObject* CreateInstance() { return static_cast< GameObject* >( new inClass() ); } \
+#pragma once
 
-class GameObject
-{
-public:
+#include <memory>
 
-	CLASS_IDENTIFICATION( 'GOBJ', GameObject )
+#include "MemoryBitStream.h"
+#include "RoboMath.h"
 
-	GameObject();
-	virtual ~GameObject() {}
+#define CLASS_IDENTIFICATION(inCode, inClass)              \
+  enum { kClassId = inCode };                              \
+  virtual uint32_t GetClassId() const { return kClassId; } \
+  static GameObject* CreateInstance() {                    \
+    return static_cast<GameObject*>(new inClass());        \
+  }
 
-	virtual	RoboCat*	GetAsCat()	{ return nullptr; }
+class GameObject {
+ public:
+  CLASS_IDENTIFICATION('GOBJ', GameObject)
 
-	virtual uint32_t GetAllStateMask()	const { return 0; }
+  GameObject();
+  virtual ~GameObject() {}
 
-	//return whether to keep processing collision
-	virtual bool	HandleCollisionWithCat( RoboCat* inCat ) { ( void ) inCat; return true; }
+  virtual uint32_t GetAllStateMask() const { return 0; }
 
-	virtual void	Update();
+  // return whether to keep processing collision
+  virtual bool HandleCollisionWithCat(GameObject* inCat) { return true; }
 
-	virtual void	HandleDying() {}
+  virtual void Update();
 
-			void	SetIndexInWorld( int inIndex )						{ mIndexInWorld = inIndex; }
-			int		GetIndexInWorld()				const				{ return mIndexInWorld; }
+  virtual void HandleDying() {}
 
-			void	SetRotation( float inRotation );
-			float	GetRotation()					const				{ return mRotation; }
+  void SetIndexInWorld(int inIndex) { mIndexInWorld = inIndex; }
+  int GetIndexInWorld() const { return mIndexInWorld; }
 
-			void	SetScale( float inScale )							{ mScale = inScale; }
-			float	GetScale()						const				{ return mScale; }
+  void SetRotation(float inRotation);
+  float GetRotation() const { return mRotation; }
 
+  void SetScale(float inScale) { mScale = inScale; }
+  float GetScale() const { return mScale; }
 
-	const Vector3&		GetLocation()				const				{ return mLocation; }
-			void		SetLocation( const Vector3& inLocation )		{ mLocation = inLocation; }
+  const Vector3& GetLocation() const { return mLocation; }
+  void SetLocation(const Vector3& inLocation) { mLocation = inLocation; }
 
-			float		GetCollisionRadius()		const				{ return mCollisionRadius; }
-			void		SetCollisionRadius( float inRadius )			{ mCollisionRadius = inRadius; }
+  float GetCollisionRadius() const { return mCollisionRadius; }
+  void SetCollisionRadius(float inRadius) { mCollisionRadius = inRadius; }
 
-			Vector3		GetForwardVector()			const;
+  Vector3 GetForwardVector() const;
 
+  void SetColor(const Vector3& inColor) { mColor = inColor; }
+  const Vector3& GetColor() const { return mColor; }
 
-			void		SetColor( const Vector3& inColor )					{ mColor = inColor; }
-	const Vector3&		GetColor()					const				{ return mColor; }
+  bool DoesWantToDie() const { return mDoesWantToDie; }
+  void SetDoesWantToDie(bool inWants) { mDoesWantToDie = inWants; }
 
-			bool		DoesWantToDie()				const				{ return mDoesWantToDie; }
-			void		SetDoesWantToDie( bool inWants )				{ mDoesWantToDie = inWants; }
+  int GetNetworkId() const { return mNetworkId; }
+  void SetNetworkId(int inNetworkId);
 
-			int			GetNetworkId()				const				{ return mNetworkId; }
-			void		SetNetworkId( int inNetworkId );
+  virtual uint32_t Write(OutputMemoryBitStream& inOutputStream,
+                         uint32_t inDirtyState) const {
+    (void)inOutputStream;
+    (void)inDirtyState;
+    return 0;
+  }
+  virtual void Read(InputMemoryBitStream& inInputStream) {
+    (void)inInputStream;
+  }
 
-	virtual uint32_t	Write( OutputMemoryBitStream& inOutputStream, uint32_t inDirtyState ) const	{ (void)inOutputStream; (void)inDirtyState; return 0; }
-	virtual void		Read( InputMemoryBitStream& inInputStream )									{ (void)inInputStream; }
+ private:
+  Vector3 mLocation;
+  Vector3 mColor;
 
-private:
+  float mCollisionRadius;
 
+  float mRotation;
+  float mScale;
+  int mIndexInWorld;
 
-	Vector3											mLocation;
-	Vector3											mColor;
-	
-	float											mCollisionRadius;
+  bool mDoesWantToDie;
 
-
-	float											mRotation;
-	float											mScale;
-	int												mIndexInWorld;
-
-	bool											mDoesWantToDie;
-
-	int												mNetworkId;
-
+  int mNetworkId;
 };
 
-typedef shared_ptr< GameObject >	GameObjectPtr;
+typedef std::shared_ptr<GameObject> GameObjectPtr;

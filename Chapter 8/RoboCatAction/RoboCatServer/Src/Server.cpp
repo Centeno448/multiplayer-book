@@ -1,145 +1,128 @@
 
-#include <RoboCatServerPCH.h>
+#include "Server.h"
 
+#include <memory>
+#include <string>
 
+#include "MouseServer.h"
+#include "RoboCatServer.h"
+#include "YarnServer.h"
 
-//uncomment this when you begin working on the server
+// uncomment this when you begin working on the server
 
-bool Server::StaticInit()
-{
-	sInstance.reset( new Server() );
+bool Server::StaticInit() {
+  sInstance.reset(new Server());
 
-	return true;
+  return true;
 }
 
-Server::Server()
-{
+Server::Server() {
+  GameObjectRegistry::sInstance->RegisterCreationFunction(
+      'RCAT', RoboCatServer::StaticCreate);
+  GameObjectRegistry::sInstance->RegisterCreationFunction(
+      'MOUS', MouseServer::StaticCreate);
+  GameObjectRegistry::sInstance->RegisterCreationFunction(
+      'YARN', YarnServer::StaticCreate);
 
-	GameObjectRegistry::sInstance->RegisterCreationFunction( 'RCAT', RoboCatServer::StaticCreate );
-	GameObjectRegistry::sInstance->RegisterCreationFunction( 'MOUS', MouseServer::StaticCreate );
-	GameObjectRegistry::sInstance->RegisterCreationFunction( 'YARN', YarnServer::StaticCreate );
+  InitNetworkManager();
 
-	InitNetworkManager();
-	
-	//NetworkManagerServer::sInstance->SetDropPacketChance( 0.8f );
-	//NetworkManagerServer::sInstance->SetSimulatedLatency( 0.25f );
-	//NetworkManagerServer::sInstance->SetSimulatedLatency( 0.5f );
-	//NetworkManagerServer::sInstance->SetSimulatedLatency( 0.1f );
-
+  // NetworkManagerServer::sInstance->SetDropPacketChance( 0.8f );
+  // NetworkManagerServer::sInstance->SetSimulatedLatency( 0.25f );
+  // NetworkManagerServer::sInstance->SetSimulatedLatency( 0.5f );
+  // NetworkManagerServer::sInstance->SetSimulatedLatency( 0.1f );
 }
 
+int Server::Run() {
+  SetupWorld();
 
-int Server::Run()
-{
-	SetupWorld();
-
-	return Engine::Run();
+  return Engine::Run();
 }
 
-bool Server::InitNetworkManager()
-{
-	string portString = StringUtils::GetCommandLineArg( 1 );
-	uint16_t port = stoi( portString );
+bool Server::InitNetworkManager() {
+  std::string portString = StringUtils::GetCommandLineArg(1);
+  uint16_t port = stoi(portString);
 
-	return NetworkManagerServer::StaticInit( port );
+  return NetworkManagerServer::StaticInit(port);
 }
 
+namespace {
 
-namespace
-{
-	
-	void CreateRandomMice( int inMouseCount )
-	{
-		Vector3 mouseMin( -5.f, -3.f, 0.f );
-		Vector3 mouseMax( 5.f, 3.f, 0.f );
-		GameObjectPtr go;
+void CreateRandomMice(int inMouseCount) {
+  Vector3 mouseMin(-5.f, -3.f, 0.f);
+  Vector3 mouseMax(5.f, 3.f, 0.f);
+  GameObjectPtr go;
 
-		//make a mouse somewhere- where will these come from?
-		for( int i = 0; i < inMouseCount; ++i )
-		{
-			go = GameObjectRegistry::sInstance->CreateGameObject( 'MOUS' );
-			Vector3 mouseLocation = RoboMath::GetRandomVector( mouseMin, mouseMax );
-			go->SetLocation( mouseLocation );
-		}
-	}
-
-
+  // make a mouse somewhere- where will these come from?
+  for (int i = 0; i < inMouseCount; ++i) {
+    go = GameObjectRegistry::sInstance->CreateGameObject('MOUS');
+    Vector3 mouseLocation = RoboMath::GetRandomVector(mouseMin, mouseMax);
+    go->SetLocation(mouseLocation);
+  }
 }
 
+}  // namespace
 
-void Server::SetupWorld()
-{
-	//spawn some random mice
-	CreateRandomMice( 10 );
-	
-	//spawn more random mice!
-	CreateRandomMice( 10 );
+void Server::SetupWorld() {
+  // spawn some random mice
+  CreateRandomMice(10);
+
+  // spawn more random mice!
+  CreateRandomMice(10);
 }
 
-void Server::DoFrame()
-{
-	NetworkManagerServer::sInstance->ProcessIncomingPackets();
+void Server::DoFrame() {
+  NetworkManagerServer::sInstance->ProcessIncomingPackets();
 
-	NetworkManagerServer::sInstance->CheckForDisconnects();
+  NetworkManagerServer::sInstance->CheckForDisconnects();
 
-	NetworkManagerServer::sInstance->RespawnCats();
+  NetworkManagerServer::sInstance->RespawnCats();
 
-	Engine::DoFrame();
+  Engine::DoFrame();
 
-	NetworkManagerServer::sInstance->SendOutgoingPackets();
-
+  NetworkManagerServer::sInstance->SendOutgoingPackets();
 }
 
-void Server::HandleNewClient( ClientProxyPtr inClientProxy )
-{
-	
-	int playerId = inClientProxy->GetPlayerId();
-	
-	ScoreBoardManager::sInstance->AddEntry( playerId, inClientProxy->GetName() );
-	SpawnCatForPlayer( playerId );
+void Server::HandleNewClient(ClientProxyPtr inClientProxy) {
+  int playerId = inClientProxy->GetPlayerId();
+
+  ScoreBoardManager::sInstance->AddEntry(playerId, inClientProxy->GetName());
+  SpawnCatForPlayer(playerId);
 }
 
-void Server::SpawnCatForPlayer( int inPlayerId )
-{
-	RoboCatPtr cat = std::static_pointer_cast< RoboCat >( GameObjectRegistry::sInstance->CreateGameObject( 'RCAT' ) );
-	cat->SetColor( ScoreBoardManager::sInstance->GetEntry( inPlayerId )->GetColor() );
-	cat->SetPlayerId( inPlayerId );
-	//gotta pick a better spawn location than this...
-	cat->SetLocation( Vector3( 1.f - static_cast< float >( inPlayerId ), 0.f, 0.f ) );
-
+void Server::SpawnCatForPlayer(int inPlayerId) {
+  RoboCatPtr cat = std::static_pointer_cast<RoboCat>(
+      GameObjectRegistry::sInstance->CreateGameObject('RCAT'));
+  cat->SetColor(ScoreBoardManager::sInstance->GetEntry(inPlayerId)->GetColor());
+  cat->SetPlayerId(inPlayerId);
+  // gotta pick a better spawn location than this...
+  cat->SetLocation(Vector3(1.f - static_cast<float>(inPlayerId), 0.f, 0.f));
 }
 
-void Server::HandleLostClient( ClientProxyPtr inClientProxy )
-{
-	//kill client's cat
-	//remove client from scoreboard
-	int playerId = inClientProxy->GetPlayerId();
+void Server::HandleLostClient(ClientProxyPtr inClientProxy) {
+  // kill client's cat
+  // remove client from scoreboard
+  int playerId = inClientProxy->GetPlayerId();
 
-	ScoreBoardManager::sInstance->RemoveEntry( playerId );
-	RoboCatPtr cat = GetCatForPlayer( playerId );
-	if( cat )
-	{
-		cat->SetDoesWantToDie( true );
-	}
+  ScoreBoardManager::sInstance->RemoveEntry(playerId);
+  RoboCatPtr cat = GetCatForPlayer(playerId);
+  if (cat) {
+    cat->SetDoesWantToDie(true);
+  }
 }
 
-RoboCatPtr Server::GetCatForPlayer( int inPlayerId )
-{
-	//run through the objects till we find the cat...
-	//it would be nice if we kept a pointer to the cat on the clientproxy
-	//but then we'd have to clean it up when the cat died, etc.
-	//this will work for now until it's a perf issue
-	const auto& gameObjects = World::sInstance->GetGameObjects();
-	for( int i = 0, c = gameObjects.size(); i < c; ++i )
-	{
-		GameObjectPtr go = gameObjects[ i ];
-		RoboCat* cat = go->GetAsCat();
-		if( cat && cat->GetPlayerId() == inPlayerId )
-		{
-			return std::static_pointer_cast< RoboCat >( go );
-		}
-	}
+RoboCatPtr Server::GetCatForPlayer(int inPlayerId) {
+  // run through the objects till we find the cat...
+  // it would be nice if we kept a pointer to the cat on the clientproxy
+  // but then we'd have to clean it up when the cat died, etc.
+  // this will work for now until it's a perf issue
+  const auto &gameObjects = World::sInstance->GetGameObjects();
+  for (int i = 0, c = static_cast<int>(gameObjects.size()); i < c; ++i) {
+    GameObjectPtr go = gameObjects[i];
+    std::shared_ptr<RoboCat> cat = std::dynamic_pointer_cast<RoboCat>(go);
+    if (cat && cat->GetPlayerId() == inPlayerId) {
+      return std::static_pointer_cast<RoboCat>(go);
+    }
+  }
 
-	return nullptr;
-
+  return nullptr;
 }

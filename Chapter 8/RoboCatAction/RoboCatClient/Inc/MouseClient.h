@@ -1,12 +1,17 @@
-class MouseClient : public Mouse
-{
-public:
-	static	GameObjectPtr	StaticCreate()		{ return GameObjectPtr( new MouseClient() ); }
+#pragma once
 
-protected:
-	MouseClient();
+#include "RoboCatShared.h"
+#include "SpriteComponent.h"
 
-private:
+class MouseClient : public Mouse {
+ public:
+  static GameObjectPtr StaticCreate() {
+    return GameObjectPtr(new MouseClient());
+  }
 
-	SpriteComponentPtr	mSpriteComponent;
+ protected:
+  MouseClient();
+
+ private:
+  SpriteComponentPtr mSpriteComponent;
 };

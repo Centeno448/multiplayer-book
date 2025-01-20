@@ -1,64 +1,75 @@
-class NetworkManagerServer : public NetworkManager
-{
-public:
-	static NetworkManagerServer*	sInstance;
+#pragma once
 
-	static bool				StaticInit( uint16_t inPort );
-		
-	virtual void			ProcessPacket( InputMemoryBitStream& inInputStream, const SocketAddress& inFromAddress ) override;
-	virtual void			HandleConnectionReset( const SocketAddress& inFromAddress ) override;
-		
-			void			SendOutgoingPackets();
-			void			CheckForDisconnects();
+#include <unordered_map>
 
-			void			RegisterGameObject( GameObjectPtr inGameObject );
-	inline	GameObjectPtr	RegisterAndReturn( GameObject* inGameObject );
-			void			UnregisterGameObject( GameObject* inGameObject );
-			void			SetStateDirty( int inNetworkId, uint32_t inDirtyState );
+#include "ClientProxy.h"
+#include "RoboCatShared.h"
 
-			void			RespawnCats();
+class NetworkManagerServer : public NetworkManager {
+ public:
+  static NetworkManagerServer* sInstance;
 
-			ClientProxyPtr	GetClientProxy( int inPlayerId ) const;
+  static bool StaticInit(uint16_t inPort);
 
-private:
-			NetworkManagerServer();
+  virtual void ProcessPacket(InputMemoryBitStream& inInputStream,
+                             const SocketAddress& inFromAddress) override;
+  virtual void HandleConnectionReset(
+      const SocketAddress& inFromAddress) override;
 
-			void	HandlePacketFromNewClient( InputMemoryBitStream& inInputStream, const SocketAddress& inFromAddress );
-			void	ProcessPacket( ClientProxyPtr inClientProxy, InputMemoryBitStream& inInputStream );
-			
-			void	SendWelcomePacket( ClientProxyPtr inClientProxy );
-			void	UpdateAllClients();
-			
-			void	AddWorldStateToPacket( OutputMemoryBitStream& inOutputStream );
-			void	AddScoreBoardStateToPacket( OutputMemoryBitStream& inOutputStream );
+  void SendOutgoingPackets();
+  void CheckForDisconnects();
 
-			void	SendStatePacketToClient( ClientProxyPtr inClientProxy );
-			void	WriteLastMoveTimestampIfDirty( OutputMemoryBitStream& inOutputStream, ClientProxyPtr inClientProxy );
+  void RegisterGameObject(GameObjectPtr inGameObject);
+  inline GameObjectPtr RegisterAndReturn(GameObject* inGameObject);
+  void UnregisterGameObject(GameObject* inGameObject);
+  void SetStateDirty(int inNetworkId, uint32_t inDirtyState);
 
-			void	HandleInputPacket( ClientProxyPtr inClientProxy, InputMemoryBitStream& inInputStream );
+  void RespawnCats();
 
-			void	HandleClientDisconnected( ClientProxyPtr inClientProxy );
+  ClientProxyPtr GetClientProxy(int inPlayerId) const;
 
-			int		GetNewNetworkId();
+ private:
+  NetworkManagerServer();
 
-	typedef unordered_map< int, ClientProxyPtr >	IntToClientMap;
-	typedef unordered_map< SocketAddress, ClientProxyPtr >	AddressToClientMap;
+  void HandlePacketFromNewClient(InputMemoryBitStream& inInputStream,
+                                 const SocketAddress& inFromAddress);
+  void ProcessPacket(ClientProxyPtr inClientProxy,
+                     InputMemoryBitStream& inInputStream);
 
-	AddressToClientMap		mAddressToClientMap;
-	IntToClientMap			mPlayerIdToClientMap;
+  void SendWelcomePacket(ClientProxyPtr inClientProxy);
+  void UpdateAllClients();
 
-	int				mNewPlayerId;
-	int				mNewNetworkId;
+  void AddWorldStateToPacket(OutputMemoryBitStream& inOutputStream);
+  void AddScoreBoardStateToPacket(OutputMemoryBitStream& inOutputStream);
 
-	float			mTimeOfLastSatePacket;
-	float			mTimeBetweenStatePackets;
-	float			mClientDisconnectTimeout;
+  void SendStatePacketToClient(ClientProxyPtr inClientProxy);
+  void WriteLastMoveTimestampIfDirty(OutputMemoryBitStream& inOutputStream,
+                                     ClientProxyPtr inClientProxy);
+
+  void HandleInputPacket(ClientProxyPtr inClientProxy,
+                         InputMemoryBitStream& inInputStream);
+
+  void HandleClientDisconnected(ClientProxyPtr inClientProxy);
+
+  int GetNewNetworkId();
+
+  typedef std::unordered_map<int, ClientProxyPtr> IntToClientMap;
+  typedef std::unordered_map<SocketAddress, ClientProxyPtr> AddressToClientMap;
+
+  AddressToClientMap mAddressToClientMap;
+  IntToClientMap mPlayerIdToClientMap;
+
+  int mNewPlayerId;
+  int mNewNetworkId;
+
+  float mTimeOfLastSatePacket;
+  float mTimeBetweenStatePackets;
+  float mClientDisconnectTimeout;
 };
 
-
-inline GameObjectPtr NetworkManagerServer::RegisterAndReturn( GameObject* inGameObject )
-{
-	GameObjectPtr toRet( inGameObject );
-	RegisterGameObject( toRet );
-	return toRet;
+inline GameObjectPtr NetworkManagerServer::RegisterAndReturn(
+    GameObject* inGameObject) {
+  GameObjectPtr toRet(inGameObject);
+  RegisterGameObject(toRet);
+  return toRet;
 }

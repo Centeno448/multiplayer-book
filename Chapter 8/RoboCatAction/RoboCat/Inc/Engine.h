@@ -1,30 +1,27 @@
+#pragma once
+
 #include <SDL_events.h>
 
-class Engine
-{
-public:
+#include <memory>
 
-	virtual ~Engine();
-	static std::unique_ptr< Engine >	sInstance;
+class Engine {
+ public:
+  virtual ~Engine();
+  static std::unique_ptr<Engine> sInstance;
 
-	virtual int		Run();
-	void			SetShouldKeepRunning( bool inShouldKeepRunning ) { mShouldKeepRunning = inShouldKeepRunning; }
-	virtual void	HandleEvent( SDL_Event* inEvent );
+  virtual int Run();
+  void SetShouldKeepRunning(bool inShouldKeepRunning) {
+    mShouldKeepRunning = inShouldKeepRunning;
+  }
+  virtual void HandleEvent(SDL_Event* inEvent);
 
-protected:
+ protected:
+  Engine();
 
-	Engine();
+  virtual void DoFrame();
 
-	virtual void	DoFrame();
+ private:
+  int DoRunLoop();
 
-private:
-
-
-			
-			int		DoRunLoop();
-
-			bool	mShouldKeepRunning;
-
-
-
+  bool mShouldKeepRunning;
 };

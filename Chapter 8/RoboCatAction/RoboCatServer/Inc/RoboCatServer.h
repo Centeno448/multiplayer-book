@@ -1,32 +1,34 @@
-enum ECatControlType
-{
-	ESCT_Human,
-	ESCT_AI
-};
+#pragma once
 
-class RoboCatServer : public RoboCat
-{
-public:
-	static GameObjectPtr	StaticCreate() { return NetworkManagerServer::sInstance->RegisterAndReturn( new RoboCatServer() ); }
-	virtual void HandleDying() override;
+#include "NetworkManagerServer.h"
+#include "RoboCatShared.h"
 
-	virtual void Update();
+enum ECatControlType { ESCT_Human, ESCT_AI };
 
-	void SetCatControlType( ECatControlType inCatControlType ) { mCatControlType = inCatControlType; }
+class RoboCatServer : public RoboCat {
+ public:
+  static GameObjectPtr StaticCreate() {
+    return NetworkManagerServer::sInstance->RegisterAndReturn(
+        new RoboCatServer());
+  }
+  virtual void HandleDying() override;
 
-	void TakeDamage( int inDamagingPlayerId );
+  virtual void Update();
 
-protected:
-	RoboCatServer();
+  void SetCatControlType(ECatControlType inCatControlType) {
+    mCatControlType = inCatControlType;
+  }
 
-private:
+  void TakeDamage(int inDamagingPlayerId);
 
-	void HandleShooting();
+ protected:
+  RoboCatServer();
 
-	ECatControlType	mCatControlType;
+ private:
+  void HandleShooting();
 
+  ECatControlType mCatControlType;
 
-	float		mTimeOfNextShot;
-	float		mTimeBetweenShots;
-
+  float mTimeOfNextShot;
+  float mTimeBetweenShots;
 };

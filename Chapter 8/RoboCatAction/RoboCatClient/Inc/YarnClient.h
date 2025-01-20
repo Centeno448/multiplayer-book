@@ -1,15 +1,20 @@
-class YarnClient : public Yarn
-{
-public:
-	static	GameObjectPtr	StaticCreate()		{ return GameObjectPtr( new YarnClient() ); }
+#pragma once
 
-	virtual void		Read( InputMemoryBitStream& inInputStream ) override;
-	virtual bool		HandleCollisionWithCat( RoboCat* inCat ) override;
+#include "RoboCatShared.h"
+#include "SpriteComponent.h"
 
-protected:
-	YarnClient();
+class YarnClient : public Yarn {
+ public:
+  static GameObjectPtr StaticCreate() {
+    return GameObjectPtr(new YarnClient());
+  }
 
-private:
+  virtual void Read(InputMemoryBitStream& inInputStream) override;
+  virtual bool HandleCollisionWithCat(GameObject* inCat) override;
 
-	SpriteComponentPtr	mSpriteComponent;
+ protected:
+  YarnClient();
+
+ private:
+  SpriteComponentPtr mSpriteComponent;
 };

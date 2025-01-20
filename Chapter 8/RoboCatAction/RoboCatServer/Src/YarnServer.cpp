@@ -1,41 +1,32 @@
-#include <RoboCatServerPCH.h>
+#include "YarnServer.h"
 
+#include "RoboCatServer.h"
 
-YarnServer::YarnServer()
-{
-	//yarn lives a second...
-	mTimeToDie = Timing::sInstance.GetFrameStartTime() + 1.f;
+YarnServer::YarnServer() {
+  // yarn lives a second...
+  mTimeToDie = Timing::sInstance.GetFrameStartTime() + 1.f;
 }
 
-void YarnServer::HandleDying()
-{
-	NetworkManagerServer::sInstance->UnregisterGameObject( this );
+void YarnServer::HandleDying() {
+  NetworkManagerServer::sInstance->UnregisterGameObject(this);
 }
 
+void YarnServer::Update() {
+  Yarn::Update();
 
-void YarnServer::Update()
-{
-	Yarn::Update();
-
-	if( Timing::sInstance.GetFrameStartTime() > mTimeToDie )
-	{
-		SetDoesWantToDie( true );
-	}
-
+  if (Timing::sInstance.GetFrameStartTime() > mTimeToDie) {
+    SetDoesWantToDie(true);
+  }
 }
 
-bool YarnServer::HandleCollisionWithCat( RoboCat* inCat )
-{
-	if( inCat->GetPlayerId() != GetPlayerId() )
-	{
-		//kill yourself!
-		SetDoesWantToDie( true );
+bool YarnServer::HandleCollisionWithCat(GameObject* inObj) {
+  RoboCat* inCat = dynamic_cast<RoboCat*>(inObj);
+  if (inCat->GetPlayerId() != GetPlayerId()) {
+    // kill yourself!
+    SetDoesWantToDie(true);
 
-		static_cast< RoboCatServer* >( inCat )->TakeDamage( GetPlayerId() );
+    static_cast<RoboCatServer*>(inCat)->TakeDamage(GetPlayerId());
+  }
 
-	}
-
-	return false;
+  return false;
 }
-
-

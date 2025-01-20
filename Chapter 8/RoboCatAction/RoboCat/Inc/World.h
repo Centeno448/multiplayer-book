@@ -1,32 +1,33 @@
+#pragma once
 
+#include <memory>
+#include <vector>
+
+#include "GameObject.h"
 
 /*
-* the world tracks all the live game objects. Failry inefficient for now, but not that much of a problem
-*/
-class World
-{
+ * the world tracks all the live game objects. Failry inefficient for now, but
+ * not that much of a problem
+ */
+class World {
+ public:
+  static void StaticInit();
 
-public:
+  static std::unique_ptr<World> sInstance;
 
-	static void StaticInit();
+  void AddGameObject(GameObjectPtr inGameObject);
+  void RemoveGameObject(GameObjectPtr inGameObject);
 
-	static std::unique_ptr< World >		sInstance;
+  void Update();
 
-	void AddGameObject( GameObjectPtr inGameObject );
-	void RemoveGameObject( GameObjectPtr inGameObject );
+  const std::vector<GameObjectPtr>& GetGameObjects() const {
+    return mGameObjects;
+  }
 
-	void Update();
+ private:
+  World();
 
-	const std::vector< GameObjectPtr >&	GetGameObjects()	const	{ return mGameObjects; }
+  int GetIndexOfGameObject(GameObjectPtr inGameObject);
 
-private:
-
-
-	World();
-
-	int	GetIndexOfGameObject( GameObjectPtr inGameObject );
-
-	std::vector< GameObjectPtr >	mGameObjects;
-
-
+  std::vector<GameObjectPtr> mGameObjects;
 };

@@ -1,22 +1,27 @@
 
-typedef GameObjectPtr ( *GameObjectCreationFunc )();
+#pragma once
 
-class GameObjectRegistry
-{
-public:
+#include <memory>
+#include <unordered_map>
 
-	static void StaticInit();
+#include "GameObject.h"
 
-	static std::unique_ptr< GameObjectRegistry >		sInstance;
+typedef GameObjectPtr (*GameObjectCreationFunc)();
 
-	void RegisterCreationFunction( uint32_t inFourCCName, GameObjectCreationFunc inCreationFunction );
+class GameObjectRegistry {
+ public:
+  static void StaticInit();
 
-	GameObjectPtr CreateGameObject( uint32_t inFourCCName );
+  static std::unique_ptr<GameObjectRegistry> sInstance;
 
-private:
+  void RegisterCreationFunction(uint32_t inFourCCName,
+                                GameObjectCreationFunc inCreationFunction);
 
-	GameObjectRegistry();
+  GameObjectPtr CreateGameObject(uint32_t inFourCCName);
 
-	unordered_map< uint32_t, GameObjectCreationFunc >	mNameToGameObjectCreationFunctionMap;
+ private:
+  GameObjectRegistry();
 
+  std::unordered_map<uint32_t, GameObjectCreationFunc>
+      mNameToGameObjectCreationFunctionMap;
 };
